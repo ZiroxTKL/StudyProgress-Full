@@ -65,7 +65,7 @@ El modelo conserva Usuario, Curso, Tema, Tarea, Evaluación, Objetivo y Recordat
 
 ## Ejecución local
 
-Se necesita **Java 21**, **Node 24** y npm. Maven Wrapper viene en el repositorio. Desde un clon de GitHub, entra en la carpeta `StudyProgress/` para ejecutar los comandos de la aplicación.
+Se necesita **Java 21**, **Node 24** y npm. Maven Wrapper viene en el repositorio. Ejecuta los comandos de la aplicación desde la raíz del repositorio.
 
 ### Opción rápida sin instalar PostgreSQL
 

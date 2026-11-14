@@ -13,7 +13,7 @@ Los datos de esa cuenta son de demostración y se guardan en PostgreSQL local. P
 
 ## Desde una copia nueva
 
-Necesitas Docker Desktop iniciado y Node 24. Abre una terminal en `StudyProgress/`. El README incluye una opción con Java 21 y H2 para ejecutar el proyecto sin Docker.
+Necesitas Docker Desktop iniciado y Node 24. Abre una terminal en la raíz del repositorio. El README incluye una opción con Java 21 y H2 para ejecutar el proyecto sin Docker.
 
 ```powershell
 node scripts/setup-local.mjs
