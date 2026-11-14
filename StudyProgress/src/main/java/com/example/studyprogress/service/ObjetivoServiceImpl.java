@@ -141,7 +141,7 @@ public class ObjetivoServiceImpl
 
         Objetivo objetivo =
                 objetivoRepository
-                        .findById(id)
+                        .findByIdForUpdate(id)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Objetivo no encontrado"

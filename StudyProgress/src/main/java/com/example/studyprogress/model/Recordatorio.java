@@ -15,6 +15,7 @@ public class Recordatorio {
     @Column(nullable = false)
     private String titulo;
 
+    @Column(length = 500)
     private String descripcion;
 
     @Column(nullable = false)

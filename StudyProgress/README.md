@@ -4,7 +4,9 @@
 
 StudyProgress reúne cursos, temas, tareas, evaluaciones, objetivos y recordatorios para que un estudiante pueda elegir su siguiente actividad y observar el avance de su semestre. Esta preparación se entrega para ejecución local; la publicación externa queda para una etapa posterior. La segunda entrega incorpora una web en React, una aplicación React Native con Expo y las ampliaciones de API necesarias para que ambos clientes trabajen sobre los mismos datos persistentes.
 
-Repositorio del equipo: https://github.com/pedrochavezoscanoa/studyprogress-backend
+Repositorio de la entrega: https://github.com/ZiroxTKL/StudyProgress-Full
+
+Backend de la primera entrega: https://github.com/pedrochavezoscanoa/studyprogress-backend
 
 ## Contenido
 
@@ -63,7 +65,7 @@ El modelo conserva Usuario, Curso, Tema, Tarea, Evaluación, Objetivo y Recordat
 
 ## Ejecución local
 
-Se necesita **Java 21**, **Node 24** y npm. Maven Wrapper viene en el repositorio. Los comandos se ejecutan desde la raíz.
+Se necesita **Java 21**, **Node 24** y npm. Maven Wrapper viene en el repositorio. Desde un clon de GitHub, entra en la carpeta `StudyProgress/` para ejecutar los comandos de la aplicación.
 
 ### Opción rápida sin instalar PostgreSQL
 

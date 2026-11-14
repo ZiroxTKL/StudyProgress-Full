@@ -4,6 +4,9 @@ on:
   pull_request:
 permissions:
   contents: read
+defaults:
+  run:
+    working-directory: StudyProgress
 concurrency:
   group: checks-${{ github.ref }}
   cancel-in-progress: true
@@ -17,13 +20,14 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
+          cache-dependency-path: StudyProgress/pom.xml
       - name: JUnit, Mockito and PostgreSQL Testcontainers contracts
         run: ./mvnw -B verify
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: backend-test-results
-          path: target/surefire-reports
+          path: StudyProgress/target/surefire-reports
   clients:
     runs-on: ubuntu-latest
     env:
@@ -35,6 +39,7 @@ jobs:
         with:
           node-version: '24'
           cache: npm
+          cache-dependency-path: StudyProgress/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm test

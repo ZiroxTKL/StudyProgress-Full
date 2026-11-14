@@ -14,12 +14,14 @@ const title = z
   .min(2, "Escribe al menos 2 caracteres")
   .max(150, "Máximo 150 caracteres");
 const description = z.string().max(500, "Máximo 500 caracteres");
-const date = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Selecciona una fecha")
-  .refine(
-    (v) => !Number.isNaN(Date.parse(v)) && v >= today(),
-    "La fecha debe ser hoy o posterior",
+const activityDescription = z.preprocess(
+  (value) => value === null ? "" : value,
+  description,
+);
+const date = (currentDate?: string) =>
+  z.iso.date("Selecciona una fecha válida").refine(
+    (value) => value === currentDate || value >= today(),
+    "La fecha debe ser hoy o posterior si la cambias",
   );
 export const loginSchema = z.object({
   email: z.email("Ingresa un correo válido"),
@@ -38,23 +40,25 @@ export const registerSchema = loginSchema.extend({
 });
 export const courseSchema = z.object({
   nombre: name,
-  descripcion: description,
+  descripcion: activityDescription,
 });
-export const taskSchema = z.object({
+export const taskFormSchema = (currentDate?: string) => z.object({
   titulo: title,
-  descripcion: description,
-  fechaLimite: date,
+  descripcion: activityDescription,
+  fechaLimite: date(currentDate),
   prioridad: z.enum(["ALTA", "MEDIA", "BAJA"]),
 });
-export const goalSchema = z.object({
+export const taskSchema = taskFormSchema();
+export const goalFormSchema = (currentDate?: string) => z.object({
   titulo: title,
-  descripcion: description,
-  fechaLimite: date,
+  descripcion: activityDescription,
+  fechaLimite: date(currentDate),
 });
+export const goalSchema = goalFormSchema();
 export const topicSchema = courseSchema;
 export const reminderSchema = z.object({
   titulo: title,
-  descripcion: description,
+  descripcion: activityDescription,
   fechaHora: z
     .string()
     .refine(
@@ -62,13 +66,14 @@ export const reminderSchema = z.object({
       "Selecciona una fecha y hora futuras",
     ),
 });
-export const evaluationSchema = z.object({
+export const evaluationFormSchema = (currentDate?: string) => z.object({
   titulo: title,
-  descripcion: description,
-  fecha: date,
+  descripcion: activityDescription,
+  fecha: date(currentDate),
   tipo: z.enum(["EXAMEN", "PRACTICA", "PROYECTO", "OTRO"]),
   ponderacion: z.coerce.number().min(0).max(100),
 });
+export const evaluationSchema = evaluationFormSchema();
 export const gradeSchema = z.object({
   calificacion: z
     .union([z.number(), z.string().trim().min(1, "Ingresa una calificación")])
@@ -84,8 +89,12 @@ export const courseQrSchema = z
     temas: z.array(name).max(10),
   })
   .strict();
+export const COURSE_QR_MAX_BYTES = 2500;
+
 export function parseCourseQr(raw: string) {
-  if (raw.length > 2500) throw new Error("El código QR es demasiado grande");
+  // This character limit also bounds parsing on devices without TextEncoder.
+  if (raw.length > COURSE_QR_MAX_BYTES)
+    throw new Error("El código QR es demasiado grande");
   return courseQrSchema.parse(JSON.parse(raw));
 }
 export function fieldErrors(error: z.ZodError) {

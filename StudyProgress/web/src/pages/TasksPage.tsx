@@ -1,9 +1,8 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, Trash2, Pencil } from "lucide-react";
-import { taskSchema, type Task } from "@studyprogress/client";
+import { taskFormSchema, type Task } from "@studyprogress/client";
 import { api } from "../services/api";
-import { useResource } from "../hooks/useResource";
 import { usePageQuery } from "../hooks/usePageQuery";
 import { useMutation } from "../hooks/useMutation";
 import {
@@ -21,8 +20,7 @@ import {
 } from "../components/ui";
 import { ResourceForm, taskFields } from "../components/ResourceForm";
 export default function TasksPage() {
-  const { q, search, setSearch, update } = usePageQuery("fechaLimite"),
-    r = useResource(useCallback((s) => api.tasks(q, s), [q])),
+  const { q, search, setSearch, update, resource: r } = usePageQuery("fechaLimite", api.tasks),
     m = useMutation(r.reload),
     [editing, setEditing] = useState<Task | null>(null),
     [deleting, setDeleting] = useState<Task | null>(null);
@@ -158,7 +156,7 @@ export default function TasksPage() {
         <Modal title="Editar tarea" onClose={() => setEditing(null)}>
           <ResourceForm
             fields={taskFields}
-            schema={taskSchema}
+            schema={taskFormSchema(editing.fechaLimite)}
             initial={{ ...editing }}
             onCancel={() => setEditing(null)}
             onSubmit={async (v) => {

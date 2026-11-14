@@ -3,8 +3,8 @@ import { Text, View } from "react-native";
 import {
   courseSchema,
   topicSchema,
-  taskSchema,
-  evaluationSchema,
+  taskFormSchema,
+  evaluationFormSchema,
   gradeSchema,
   today,
   type Task,
@@ -51,7 +51,11 @@ export default function CourseScreen({ id }: { id: number }) {
       schema: courseSchema,
       title: "Editar curso",
     },
-    task: { fields: taskFields, schema: taskSchema, title: "Tarea" },
+    task: {
+      fields: taskFields,
+      schema: taskFormSchema(editor?.item?.fechaLimite),
+      title: "Tarea",
+    },
     topic: {
       fields: [
         { name: "nombre", label: "Nombre del tema" },
@@ -62,7 +66,7 @@ export default function CourseScreen({ id }: { id: number }) {
     },
     evaluation: {
       fields: evaluationFields,
-      schema: evaluationSchema,
+      schema: evaluationFormSchema(editor?.item?.fecha),
       title: "Evaluación",
     },
     grade: {

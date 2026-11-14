@@ -26,7 +26,8 @@ public class TareaRequest {
 
     @NotNull(message = "La fecha límite es obligatoria")
     @FutureOrPresent(
-            message = "La fecha límite no puede estar en el pasado"
+            message = "La fecha límite no puede estar en el pasado",
+            groups = OnCreate.class
     )
     private LocalDate fechaLimite;
 

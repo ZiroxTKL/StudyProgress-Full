@@ -13,6 +13,7 @@ public class Tema {
     @Column(nullable = false)
     private String nombre;
 
+    @Column(length = 500)
     private String descripcion;
 
     private boolean completado = false;

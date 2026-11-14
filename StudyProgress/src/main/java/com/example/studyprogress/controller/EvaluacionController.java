@@ -6,6 +6,8 @@ import com.example.studyprogress.dto.EvaluacionResponseDTO;
 import com.example.studyprogress.mapper.EvaluacionMapper;
 import com.example.studyprogress.model.Evaluacion;
 import com.example.studyprogress.service.EvaluacionService;
+import org.springframework.validation.annotation.Validated;
+import com.example.studyprogress.dto.OnCreate;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +34,7 @@ public class EvaluacionController {
     @PostMapping("/cursos/{cursoId}/evaluaciones")
     public ResponseEntity<EvaluacionResponseDTO> crearEvaluacion(
             @PathVariable Long cursoId,
-            @Valid @RequestBody EvaluacionRequest request,
+            @Validated(OnCreate.class) @RequestBody EvaluacionRequest request,
             Authentication authentication
     ) {
 

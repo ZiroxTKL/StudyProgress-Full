@@ -5,7 +5,8 @@ import com.example.studyprogress.dto.TareaResponseDTO;
 import com.example.studyprogress.mapper.TareaMapper;
 import com.example.studyprogress.model.Tarea;
 import com.example.studyprogress.service.TareaService;
-import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import com.example.studyprogress.dto.OnCreate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,7 +32,7 @@ public class TareaController {
     @PostMapping("/cursos/{cursoId}/tareas")
     public ResponseEntity<TareaResponseDTO> crearTarea(
             @PathVariable Long cursoId,
-            @Valid @RequestBody TareaRequest request,
+            @Validated(OnCreate.class) @RequestBody TareaRequest request,
             Authentication authentication
     ) {
 

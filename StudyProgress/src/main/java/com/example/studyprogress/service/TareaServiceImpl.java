@@ -106,7 +106,7 @@ public class TareaServiceImpl implements TareaService {
             String email
     ) {
 
-        Tarea tarea = tareaRepository.findById(id)
+        Tarea tarea = tareaRepository.findByIdForUpdate(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Tarea no encontrada"

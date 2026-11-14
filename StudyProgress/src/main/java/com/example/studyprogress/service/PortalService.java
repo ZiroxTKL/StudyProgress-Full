@@ -7,6 +7,7 @@ import com.example.studyprogress.exception.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
 import java.util.*;
 @Service
 @Transactional
@@ -61,16 +62,24 @@ public class PortalService {
             "puntos",u.getPuntos(),"nivel",game.obtenerNivel(u),"progreso",all.stream().map(progress::calcularProgresoCurso).toList(),
             "proximasTareas",allTasks.stream().filter(t->!t.isCompletada()).sorted(Comparator.comparing(Tarea::getFechaLimite)).limit(5).map(tm::toDTO).toList());
     }
+    private void validateDateChange(LocalDate currentDate, LocalDate newDate, String field) {
+        if (!newDate.equals(currentDate) && newDate.isBefore(LocalDate.now())) {
+            throw new InvalidOperationException(field + " no puede cambiarse a una fecha pasada");
+        }
+    }
+
     public TareaResponseDTO updateTask(long id,TareaRequest body,String email){
-        Tarea t=tasks.findById(id).orElseThrow(()->new ResourceNotFoundException("Tarea no encontrada"));owner(t.getCurso().getUsuario().getEmail(),email);
+        Tarea t=tasks.findByIdForUpdate(id).orElseThrow(()->new ResourceNotFoundException("Tarea no encontrada"));owner(t.getCurso().getUsuario().getEmail(),email);
+        validateDateChange(t.getFechaLimite(), body.getFechaLimite(), "La fecha límite");
         t.setTitulo(body.getTitulo());t.setDescripcion(body.getDescripcion());t.setFechaLimite(body.getFechaLimite());t.setPrioridad(body.getPrioridad());return tm.toDTO(tasks.save(t));
     }
     public TemaResponseDTO updateTopic(long id,TemaRequest body,String email){
-        Tema t=topics.findById(id).orElseThrow(()->new ResourceNotFoundException("Tema no encontrado"));owner(t.getCurso().getUsuario().getEmail(),email);
+        Tema t=topics.findByIdForUpdate(id).orElseThrow(()->new ResourceNotFoundException("Tema no encontrado"));owner(t.getCurso().getUsuario().getEmail(),email);
         t.setNombre(body.getNombre());t.setDescripcion(body.getDescripcion());return topicMapper.toDTO(topics.save(t));
     }
     public ObjetivoResponseDTO updateGoal(long id,ObjetivoRequest body,String email){
-        Objetivo t=goals.findById(id).orElseThrow(()->new ResourceNotFoundException("Objetivo no encontrado"));owner(t.getUsuario().getEmail(),email);
+        Objetivo t=goals.findByIdForUpdate(id).orElseThrow(()->new ResourceNotFoundException("Objetivo no encontrado"));owner(t.getUsuario().getEmail(),email);
+        validateDateChange(t.getFechaLimite(), body.getFechaLimite(), "La fecha límite");
         t.setTitulo(body.getTitulo());t.setDescripcion(body.getDescripcion());t.setFechaLimite(body.getFechaLimite());return gm.toDTO(goals.save(t));
     }
     public RecordatorioResponseDTO updateReminder(long id,RecordatorioRequest body,String email){
@@ -79,6 +88,7 @@ public class PortalService {
     }
     public EvaluacionResponseDTO updateEvaluation(long id,EvaluacionRequest body,String email){
         Evaluacion t=evaluations.findById(id).orElseThrow(()->new ResourceNotFoundException("Evaluación no encontrada"));owner(t.getCurso().getUsuario().getEmail(),email);
+        validateDateChange(t.getFecha(), body.getFecha(), "La fecha de la evaluación");
         t.setTitulo(body.getTitulo());t.setDescripcion(body.getDescripcion());t.setFecha(body.getFecha());t.setTipo(body.getTipo());t.setPonderacion(body.getPonderacion());return em.toDTO(evaluations.save(t));
     }
     public CursoResponseDTO importCourse(CourseImportRequest body,String email){

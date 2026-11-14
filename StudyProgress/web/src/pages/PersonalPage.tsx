@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Check, Pencil, Trash2, Bell, Target } from "lucide-react";
 import {
-  goalSchema,
+  goalFormSchema,
   reminderSchema,
   today,
   type Goal,
@@ -172,7 +172,11 @@ export default function PersonalPage() {
         >
           <ResourceForm
             fields={fields}
-            schema={goals ? goalSchema : reminderSchema}
+            schema={goals
+              ? goalFormSchema(editor !== "new" && "fechaLimite" in editor
+                ? editor.fechaLimite
+                : undefined)
+              : reminderSchema}
             initial={
               editor === "new"
                 ? {

@@ -27,7 +27,8 @@ public class EvaluacionRequest {
 
     @NotNull(message = "La fecha de la evaluación es obligatoria")
     @FutureOrPresent(
-            message = "La fecha de la evaluación no puede estar en el pasado"
+            message = "La fecha de la evaluación no puede estar en el pasado",
+            groups = OnCreate.class
     )
     private LocalDate fecha;
 

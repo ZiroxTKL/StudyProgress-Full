@@ -5,7 +5,8 @@ import com.example.studyprogress.dto.ObjetivoResponseDTO;
 import com.example.studyprogress.mapper.ObjetivoMapper;
 import com.example.studyprogress.model.Objetivo;
 import com.example.studyprogress.service.ObjetivoService;
-import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import com.example.studyprogress.dto.OnCreate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -30,7 +31,7 @@ public class ObjetivoController {
 
     @PostMapping
     public ResponseEntity<ObjetivoResponseDTO> crearObjetivo(
-            @Valid @RequestBody ObjetivoRequest request,
+            @Validated(OnCreate.class) @RequestBody ObjetivoRequest request,
             Authentication authentication
     ) {
 

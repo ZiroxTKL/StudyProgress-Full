@@ -3,6 +3,7 @@ import com.example.studyprogress.dto.*;
 import com.example.studyprogress.mapper.*;
 import com.example.studyprogress.service.*;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class PortalController {
     @GetMapping("/cursos/{id}") public Map<String,Object> detail(@PathVariable long id,Authentication a){return portal.detail(id,a.getName());}
     @PutMapping("/cursos/{id}") public CursoResponseDTO update(@PathVariable long id,@Valid @RequestBody CursoRequest b,Authentication a){return portal.updateCourse(id,b,a.getName());}
     @DeleteMapping("/cursos/{id}") public ResponseEntity<Void> delete(@PathVariable long id,Authentication a){portal.deleteCourse(id,a.getName());return ResponseEntity.noContent().build();}
-    @PostMapping("/cursos/{id}/tareas") public ResponseEntity<TareaResponseDTO> task(@PathVariable long id,@Valid @RequestBody TareaRequest b,Authentication a){return ResponseEntity.status(201).body(tm.toDTO(tasks.crearTarea(id,b,a.getName())));}
+    @PostMapping("/cursos/{id}/tareas") public ResponseEntity<TareaResponseDTO> task(@PathVariable long id,@Validated(OnCreate.class) @RequestBody TareaRequest b,Authentication a){return ResponseEntity.status(201).body(tm.toDTO(tasks.crearTarea(id,b,a.getName())));}
     @PutMapping("/tareas/{id}") public TareaResponseDTO taskUpdate(@PathVariable long id,@Valid @RequestBody TareaRequest b,Authentication a){return portal.updateTask(id,b,a.getName());}
     @PatchMapping("/tareas/{id}/completar") public TareaResponseDTO taskComplete(@PathVariable long id,Authentication a){return tm.toDTO(tasks.completarTarea(id,a.getName()));}
     @DeleteMapping("/tareas/{id}") public ResponseEntity<Void> taskDelete(@PathVariable long id,Authentication a){tasks.eliminarTareaDelUsuario(id,a.getName());return ResponseEntity.noContent().build();}
@@ -36,12 +37,12 @@ public class PortalController {
     @PutMapping("/temas/{id}") public TemaResponseDTO topicUpdate(@PathVariable long id,@Valid @RequestBody TemaRequest b,Authentication a){return portal.updateTopic(id,b,a.getName());}
     @PatchMapping("/temas/{id}/completar") public TemaResponseDTO topicComplete(@PathVariable long id,Authentication a){return topicMapper.toDTO(topics.completarTema(id,a.getName()));}
     @DeleteMapping("/temas/{id}") public ResponseEntity<Void> topicDelete(@PathVariable long id,Authentication a){topics.eliminarTemaDelUsuario(id,a.getName());return ResponseEntity.noContent().build();}
-    @PostMapping("/cursos/{id}/evaluaciones") public ResponseEntity<EvaluacionResponseDTO> evaluation(@PathVariable long id,@Valid @RequestBody EvaluacionRequest b,Authentication a){return ResponseEntity.status(201).body(em.toDTO(evaluations.crearEvaluacion(id,b,a.getName())));}
+    @PostMapping("/cursos/{id}/evaluaciones") public ResponseEntity<EvaluacionResponseDTO> evaluation(@PathVariable long id,@Validated(OnCreate.class) @RequestBody EvaluacionRequest b,Authentication a){return ResponseEntity.status(201).body(em.toDTO(evaluations.crearEvaluacion(id,b,a.getName())));}
     @PutMapping("/evaluaciones/{id}") public EvaluacionResponseDTO evaluationUpdate(@PathVariable long id,@Valid @RequestBody EvaluacionRequest b,Authentication a){return portal.updateEvaluation(id,b,a.getName());}
     @PatchMapping("/evaluaciones/{id}/calificacion") public EvaluacionResponseDTO grade(@PathVariable long id,@Valid @RequestBody CalificacionRequest b,Authentication a){return em.toDTO(evaluations.registrarCalificacion(id,b,a.getName()));}
     @DeleteMapping("/evaluaciones/{id}") public ResponseEntity<Void> evaluationDelete(@PathVariable long id,Authentication a){evaluations.eliminarEvaluacionDelUsuario(id,a.getName());return ResponseEntity.noContent().build();}
     @GetMapping("/objetivos") public List<ObjetivoResponseDTO> goals(Authentication a){return goals.listarObjetivosDelUsuario(a.getName()).stream().map(gm::toDTO).toList();}
-    @PostMapping("/objetivos") public ResponseEntity<ObjetivoResponseDTO> goal(@Valid @RequestBody ObjetivoRequest b,Authentication a){return ResponseEntity.status(201).body(gm.toDTO(goals.crearObjetivo(b,a.getName())));}
+    @PostMapping("/objetivos") public ResponseEntity<ObjetivoResponseDTO> goal(@Validated(OnCreate.class) @RequestBody ObjetivoRequest b,Authentication a){return ResponseEntity.status(201).body(gm.toDTO(goals.crearObjetivo(b,a.getName())));}
     @PutMapping("/objetivos/{id}") public ObjetivoResponseDTO goalUpdate(@PathVariable long id,@Valid @RequestBody ObjetivoRequest b,Authentication a){return portal.updateGoal(id,b,a.getName());}
     @PatchMapping("/objetivos/{id}/completar") public ObjetivoResponseDTO goalComplete(@PathVariable long id,Authentication a){return gm.toDTO(goals.completarObjetivo(id,a.getName()));}
     @DeleteMapping("/objetivos/{id}") public ResponseEntity<Void> goalDelete(@PathVariable long id,Authentication a){goals.eliminarObjetivoDelUsuario(id,a.getName());return ResponseEntity.noContent().build();}

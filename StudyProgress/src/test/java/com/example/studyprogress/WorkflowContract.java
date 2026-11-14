@@ -1,6 +1,11 @@
 package com.example.studyprogress;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import java.sql.Date;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 import java.net.*;
 import java.net.http.*;
 import java.util.*;
@@ -8,6 +13,7 @@ import tools.jackson.databind.*;
 import static org.junit.jupiter.api.Assertions.*;
 abstract class WorkflowContract {
     @Value("${local.server.port}") int port;
+    @Autowired JdbcTemplate database;
     final HttpClient http=HttpClient.newHttpClient();
     final ObjectMapper json=new ObjectMapper();
     record Result(int status,JsonNode body,HttpResponse<String> response){}
@@ -43,6 +49,83 @@ abstract class WorkflowContract {
         call("PATCH","/api/v1/tareas/"+id+"/completar",null,a);assertEquals(points,call("GET","/api/v1/auth/me",null,a).body().get("puntos").asInt());
         assertEquals(1,call("GET","/api/v1/dashboard",null,a).body().get("tareasCompletadas").asInt());
     }
+    @Test
+    void concurrentCompletionAwardsEveryActivityExactlyOnce() throws Exception {
+        String token = registerAndLogin(email());
+        long courseId = course(token, "Actividades en paralelo");
+        String coursePath = "/api/v1/cursos/" + courseId;
+        List<String> completions = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            var task = call("POST", coursePath + "/tareas", taskBody(), token);
+            assertEquals(201, task.status());
+            completions.add("/api/v1/tareas/" + task.body().get("id").asLong() + "/completar");
+        }
+        var topic = call("POST", coursePath + "/temas", """
+                {"nombre":"Tema concurrente","descripcion":""}
+                """, token);
+        assertEquals(201, topic.status());
+        completions.add("/api/v1/temas/" + topic.body().get("id").asLong() + "/completar");
+        var goal = call("POST", "/api/v1/objetivos", """
+                {"titulo":"Objetivo concurrente","descripcion":"","fechaLimite":"2099-12-01"}
+                """, token);
+        assertEquals(201, goal.status());
+        completions.add("/api/v1/objetivos/" + goal.body().get("id").asLong() + "/completar");
+
+        List<Callable<Result>> requests = new ArrayList<>();
+        for (String path : completions) {
+            for (int attempt = 0; attempt < 2; attempt++) {
+                requests.add(() -> call("PATCH", path, null, token));
+            }
+        }
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            for (var response : executor.invokeAll(requests)) {
+                assertEquals(200, response.get().status(), response.get().body().toString());
+            }
+        }
+        var dashboard = call("GET", "/api/v1/dashboard", null, token).body();
+        assertEquals(12, dashboard.get("tareasCompletadas").asInt());
+        assertEquals(1, dashboard.get("objetivosCompletados").asInt());
+        assertEquals(280, dashboard.get("puntos").asInt());
+    }
+
+    @Test
+    void descriptionsAcceptedByValidationPersistAtTheLimit() throws Exception {
+        String token = registerAndLogin(email());
+        String description = "á".repeat(500);
+        var body = json.createObjectNode().put("nombre", "Curso largo").put("descripcion", description);
+        var created = call("POST", "/api/v1/cursos", body.toString(), token);
+        assertEquals(201, created.status());
+        String path = "/api/v1/cursos/" + created.body().get("id").asLong();
+        assertEquals(description, call("GET", path, null, token).body().get("curso").get("descripcion").asText());
+        body.put("descripcion", description + "a");
+        assertEquals(400, call("POST", "/api/v1/cursos", body.toString(), token).status());
+    }
+
+    @Test
+    void editPreservesExistingPastDateButCannotSetAnotherPastDate() throws Exception {
+        String token = registerAndLogin(email());
+        long courseId = course(token, "Curso con historial");
+        String createPath = "/api/v1/cursos/" + courseId + "/tareas";
+        var created = call("POST", createPath, taskBody(), token);
+        assertEquals(201, created.status());
+        long taskId = created.body().get("id").asLong();
+        database.update("update tareas set fecha_limite = ? where id = ?", Date.valueOf("2000-12-01"), taskId);
+
+        var body = json.createObjectNode()
+                .put("titulo", "Título corregido")
+                .put("descripcion", "Actualizada")
+                .put("fechaLimite", "2000-12-01")
+                .put("prioridad", "ALTA");
+        String editPath = "/api/v1/tareas/" + taskId;
+        var edited = call("PUT", editPath, body.toString(), token);
+        assertEquals(200, edited.status(), edited.body().toString());
+        assertEquals("2000-12-01", edited.body().get("fechaLimite").asText());
+        assertEquals("Actualizada", edited.body().get("descripcion").asText());
+        assertEquals(400, call("POST", createPath, body.toString(), token).status());
+        body.put("fechaLimite", "2000-12-02");
+        assertEquals(400, call("PUT", editPath, body.toString(), token).status());
+    }
+
     @Test void invalidTaskAndPaginationReturn400()throws Exception{String a=registerAndLogin(email());long c=course(a,"Validación");assertEquals(400,call("POST","/api/v1/cursos/"+c+"/tareas","{\"titulo\":\"x\"}",a).status());assertEquals(400,call("GET","/api/v1/cursos?size=10000",null,a).status());assertEquals(400,call("GET","/api/v1/tareas?sort=password",null,a).status());assertEquals(400,call("GET","/api/v1/cursos?page=abc",null,a).status());}
     @Test void browserRefreshCookieRotatesAndLogoutRevokes()throws Exception{
         String e=email();registerAndLogin(e);var l=login(e);String cookie=l.response().headers().firstValue("set-cookie").orElseThrow();assertTrue(cookie.contains("HttpOnly"));assertTrue(cookie.contains("SameSite=Strict"));assertFalse(l.body().has("refreshToken"));

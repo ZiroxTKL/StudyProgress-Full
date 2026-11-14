@@ -13,6 +13,7 @@ public class Curso {
     @Column(nullable = false)
     private String nombre;
 
+    @Column(length = 500)
     private String descripcion;
 
     @ManyToOne

@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { Text, View } from "react-native";
 import {
-  goalSchema,
+  goalFormSchema,
   reminderSchema,
   today,
   type Goal,
@@ -135,7 +135,11 @@ export default function PersonalScreen({ goals }: { goals: boolean }) {
         >
           <ResourceForm
             fields={fields}
-            schema={goals ? goalSchema : reminderSchema}
+            schema={goals
+              ? goalFormSchema(editor !== "new" && "fechaLimite" in editor
+                ? editor.fechaLimite
+                : undefined)
+              : reminderSchema}
             initial={
               editor === "new"
                 ? {

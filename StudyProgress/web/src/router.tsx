@@ -6,7 +6,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
-import { Spinner } from "./components/ui";
+import { Spinner, ViewError } from "./components/ui";
 import Layout from "./components/Layout";
 const AuthPage = lazy(() => import("./pages/AuthPage")),
   DashboardPage = lazy(() => import("./pages/DashboardPage")),
@@ -34,7 +34,7 @@ function PrivateRoute() {
 const page = (node: React.ReactNode) => (
   <Suspense fallback={<Spinner />}>{node}</Suspense>
 );
-export const router = createBrowserRouter([
+const routes = [
   { path: "/login", element: page(<AuthPage />) },
   { path: "/registro", element: page(<AuthPage />) },
   {
@@ -42,6 +42,7 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <Layout />,
+        errorElement: <ViewError />,
         children: [
           { path: "/", element: <Navigate to="/dashboard" replace /> },
           { path: "/dashboard", element: page(<DashboardPage />) },
@@ -59,4 +60,8 @@ export const router = createBrowserRouter([
     ],
   },
   { path: "*", element: page(<NotFoundPage />) },
+];
+
+export const router = createBrowserRouter([
+  { errorElement: <ViewError />, children: routes },
 ]);

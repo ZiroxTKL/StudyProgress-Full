@@ -93,7 +93,7 @@ public class TemaServiceImpl implements TemaService {
             String email
     ) {
 
-        Tema tema = temaRepository.findById(id)
+        Tema tema = temaRepository.findByIdForUpdate(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Tema no encontrado"

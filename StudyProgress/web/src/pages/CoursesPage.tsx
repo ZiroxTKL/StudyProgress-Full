@@ -1,9 +1,8 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, BookOpen, MoreHorizontal } from "lucide-react";
 import { courseSchema, type Course } from "@studyprogress/client";
 import { api } from "../services/api";
-import { useResource } from "../hooks/useResource";
 import { usePageQuery } from "../hooks/usePageQuery";
 import {
   PageHeading,
@@ -18,8 +17,7 @@ import {
 import { ResourceForm, courseFields } from "../components/ResourceForm";
 import { useToast } from "../contexts/ToastContext";
 export default function CoursesPage() {
-  const { q, search, setSearch, update } = usePageQuery("nombre"),
-    r = useResource(useCallback((s) => api.courses(q, s), [q])),
+  const { q, search, setSearch, update, resource: r } = usePageQuery("nombre", api.courses),
     [creating, setCreating] = useState(false),
     toast = useToast();
   return (

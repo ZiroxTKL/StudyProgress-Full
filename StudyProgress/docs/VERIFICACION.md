@@ -1,5 +1,16 @@
 # Verificación de la entrega local
 
+## Versión corregida del 14 de noviembre de 2026
+
+- Pasaron 14 contratos HTTP sobre H2 y los mismos 14 sobre PostgreSQL 16.9 local, más 2 pruebas de progreso con Mockito. La ejecución con Docker Testcontainers se omitió en este equipo. Para comprobar PostgreSQL se reutilizó el contrato con la conexión al servidor local.
+- El contrato concurrente envió dos solicitudes por cada una de 12 tareas, 1 tema y 1 objetivo. Se guardaron las actividades completadas y se otorgaron exactamente los 280 puntos esperados.
+- Se comprobó la persistencia de una descripción de 500 caracteres y la validación de 501. El arranque contra la base PostgreSQL de la revisión anterior amplió las columnas con la configuración de actualización de esquema existente.
+- Los contratos comprobaron que se puede editar una tarea conservando su fecha vencida y que se rechaza crear tareas con fechas vencidas o cambiar su fecha por otra pasada. La misma regla se aplica a los objetivos y las evaluaciones.
+- En el navegador se comprobó la edición de una tarea vencida, la recuperación tras borrar la última fila de una página, la corrección de enlaces con páginas inválidas y el aviso al generar un QR que supera el límite. Un curso con contenido breve sigue mostrando su QR.
+- Pasaron las 12 pruebas de cliente, las comprobaciones TypeScript y la compilación web. Expo confirmó la compatibilidad de dependencias y exportó el bundle JavaScript Android. Queda comprobar cámara y GPS, incluidos permisos denegados, en un teléfono real.
+
+## Resultados de la versión anterior
+
 Fecha de revisión: 13 de noviembre de 2026, hora de Lima.
 
 ## Comprobaciones realizadas

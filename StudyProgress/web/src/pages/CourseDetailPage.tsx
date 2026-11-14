@@ -5,9 +5,10 @@ import { Check, Pencil, Trash2, QrCode, Plus } from "lucide-react";
 import {
   courseSchema,
   topicSchema,
-  taskSchema,
-  evaluationSchema,
+  taskFormSchema,
+  evaluationFormSchema,
   gradeSchema,
+  COURSE_QR_MAX_BYTES,
   today,
   type Task,
   type Topic,
@@ -58,13 +59,24 @@ export default function CourseDetailPage() {
   if (r.loading) return <Skeleton />;
   if (r.error) return <ErrorState message={r.error} retry={r.reload} />;
   const d = r.data!;
+  const qrPayload = qr ? JSON.stringify({
+    version: 1,
+    type: "studyprogress-course",
+    nombre: d.curso.nombre,
+    descripcion: d.curso.descripcion || "",
+    temas: d.temas.slice(0, 10).map((topic) => topic.nombre),
+  }) : null;
   const configs = {
     course: {
       fields: courseFields,
       schema: courseSchema,
       title: "Editar curso",
     },
-    task: { fields: taskFields, schema: taskSchema, title: "Tarea" },
+    task: {
+      fields: taskFields,
+      schema: taskFormSchema(editor?.item?.fechaLimite),
+      title: "Tarea",
+    },
     topic: {
       fields: [
         { name: "nombre", label: "Nombre del tema" },
@@ -75,7 +87,7 @@ export default function CourseDetailPage() {
     },
     evaluation: {
       fields: evaluationFields,
-      schema: evaluationSchema,
+      schema: evaluationFormSchema(editor?.item?.fecha),
       title: "Evaluación",
     },
     grade: {
@@ -351,28 +363,27 @@ export default function CourseDetailPage() {
           />
         </Modal>
       )}
-      {qr && (
+      {qrPayload && (
         <Modal title="Lleva este curso a tu app" onClose={() => setQr(false)}>
-          <p className="muted">
-            Escanea desde la app móvil. Se copiará el nombre del curso y hasta
-            10 temas; tus tareas y notas siguen siendo privadas.
-          </p>
-          <div className="qr-code">
-            <QRCodeSVG
-              value={JSON.stringify({
-                version: 1,
-                type: "studyprogress-course",
-                nombre: d.curso.nombre,
-                descripcion: d.curso.descripcion || "",
-                temas: d.temas.slice(0, 10).map((t) => t.nombre),
-              })}
-              size={260}
-              level="L"
-            />
-          </div>
-          <small className="muted">
-            En la app: Herramientas → Importar curso con QR.
-          </small>
+          {new TextEncoder().encode(qrPayload).length > COURSE_QR_MAX_BYTES ? (
+            <p role="alert">
+              El contenido del curso es demasiado grande para generar un QR.
+              Acorta la descripción o los nombres de los temas e inténtalo de nuevo.
+            </p>
+          ) : (
+            <>
+              <p className="muted">
+                Escanea desde la app móvil. Se copiará el nombre del curso y hasta
+                10 temas. Tus tareas y notas siguen siendo privadas.
+              </p>
+              <div className="qr-code">
+                <QRCodeSVG value={qrPayload} size={260} level="L" />
+              </div>
+              <small className="muted">
+                En la app, abre Herramientas y elige Importar curso con QR.
+              </small>
+            </>
+          )}
         </Modal>
       )}
       {deletion && (

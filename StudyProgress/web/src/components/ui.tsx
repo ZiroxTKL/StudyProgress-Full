@@ -323,6 +323,16 @@ export function AddButton({
     </Button>
   );
 }
+export function ViewError() {
+  return (
+    <main className="state">
+      <h1>Esta vista tuvo un problema</h1>
+      <p>Recarga la página para volver a intentarlo.</p>
+      <Button onClick={() => window.location.reload()}>Recargar aplicación</Button>
+    </main>
+  );
+}
+
 export class ErrorBoundary extends Component<
   { children: ReactNode },
   { error: boolean }
@@ -333,15 +343,7 @@ export class ErrorBoundary extends Component<
   }
   componentDidCatch(_error: Error, _info: ErrorInfo) {}
   render() {
-    return this.state.error ? (
-      <main className="state">
-        <h1>Esta vista tuvo un problema</h1>
-        <p>Tus datos están guardados. Recarga para continuar.</p>
-        <Button onClick={() => location.reload()}>Recargar aplicación</Button>
-      </main>
-    ) : (
-      this.props.children
-    );
+    return this.state.error ? <ViewError /> : this.props.children;
   }
 }
 export const dateLabel = (s: string) =>
