@@ -1,0 +1,2469 @@
+{
+  "info": {
+    "name": "StudyProgress Entrega 2 · API v1",
+    "description": "Flujo completo sobre el backend propio. Ejecutar con cuenta de pruebas nueva. X-Client native permite probar refresh opaco desde Postman; la web usa cookie HttpOnly. Los ejemplos son ilustrativos y no evidencias capturadas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "postman-entrega2@example.invalid",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "PostmanStudy2026",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cursoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cursoImportadoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "temaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tareaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "evaluacionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "objetivoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recordatorioId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Sesión",
+      "item": [
+        {
+          "name": "Registrar usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/registro",
+            "description": "Registrar usuario. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Estudiante Postman\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Password no expuesto', () => pm.expect(pm.response.json()).not.to.have.property('password'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/auth/registro",
+                "description": "Registrar usuario. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Estudiante Postman\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Iniciar sesión nativa / Postman",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Iniciar sesión nativa / Postman. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const data = pm.response.json(); pm.collectionVariables.set('token', data.token); pm.collectionVariables.set('refreshToken', data.refreshToken); }"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/auth/login",
+                "description": "Iniciar sesión nativa / Postman. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"JWT_DE_ACCESO\",\n  \"refreshToken\": \"TOKEN_OPACO_DE_RENOVACION\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mi perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/me",
+            "description": "Mi perfil. Consulta persistente del usuario autenticado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/auth/me",
+                "description": "Mi perfil. Consulta persistente del usuario autenticado."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"nombre\": \"Estudiante Postman\",\n  \"email\": \"estudiante@example.invalid\",\n  \"puntos\": 0,\n  \"rol\": \"USER\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Renovar y rotar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/refresh",
+            "description": "Renovar y rotar sesión. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "if (pm.response.code === 200) { const data = pm.response.json(); pm.collectionVariables.set('token', data.token); pm.collectionVariables.set('refreshToken', data.refreshToken); }"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/auth/refresh",
+                "description": "Renovar y rotar sesión. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"JWT_DE_ACCESO\",\n  \"refreshToken\": \"TOKEN_OPACO_DE_RENOVACION\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Resumen",
+      "item": [
+        {
+          "name": "Resumen académico",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/dashboard",
+            "description": "Resumen académico. Consulta persistente del usuario autenticado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/dashboard",
+                "description": "Resumen académico. Consulta persistente del usuario autenticado."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cursos",
+      "item": [
+        {
+          "name": "Crear curso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos",
+            "description": "Crear curso. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Desarrollo Basado en Plataformas\",\n  \"descripcion\": \"Curso de demostración\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('cursoId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos",
+                "description": "Crear curso. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Desarrollo Basado en Plataformas\",\n  \"descripcion\": \"Curso de demostración\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"nombre\": \"Desarrollo Basado en Plataformas\",\n  \"descripcion\": \"Curso de demostración\",\n  \"id\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar cursos paginados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos?page=0&size=10&search=&sort=nombre",
+            "description": "Listar cursos paginados. Consulta persistente del usuario autenticado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos?page=0&size=10&search=&sort=nombre",
+                "description": "Listar cursos paginados. Consulta persistente del usuario autenticado."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"content\": [],\n  \"page\": 0,\n  \"size\": 10,\n  \"total\": 0,\n  \"totalPages\": 0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Detalle con actividades y progreso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos/{{cursoId}}",
+            "description": "Detalle con actividades y progreso. Consulta persistente del usuario autenticado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos/{{cursoId}}",
+                "description": "Detalle con actividades y progreso. Consulta persistente del usuario autenticado."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Editar curso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos/{{cursoId}}",
+            "description": "Editar curso. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Desarrollo Basado en Plataformas\",\n  \"descripcion\": \"Curso de demostración\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos/{{cursoId}}",
+                "description": "Editar curso. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Desarrollo Basado en Plataformas\",\n  \"descripcion\": \"Curso de demostración\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Importar plantilla QR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos/importar",
+            "description": "Importar plantilla QR. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Curso importado\",\n  \"descripcion\": \"Plantilla compartida\",\n  \"temas\": [\n    \"React\",\n    \"Spring Boot\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('cursoImportadoId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos/importar",
+                "description": "Importar plantilla QR. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Curso importado\",\n  \"descripcion\": \"Plantilla compartida\",\n  \"temas\": [\n    \"React\",\n    \"Spring Boot\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"nombre\": \"Curso importado\",\n  \"descripcion\": \"Plantilla compartida\",\n  \"temas\": [\n    \"React\",\n    \"Spring Boot\"\n  ],\n  \"id\": 1\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Actividades",
+      "item": [
+        {
+          "name": "Crear tema",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos/{{cursoId}}/temas",
+            "description": "Crear tema. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"React y hooks\",\n  \"descripcion\": \"Estado, efectos y contextos\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('temaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos/{{cursoId}}/temas",
+                "description": "Crear tema. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"React y hooks\",\n  \"descripcion\": \"Estado, efectos y contextos\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"nombre\": \"React y hooks\",\n  \"descripcion\": \"Estado, efectos y contextos\",\n  \"id\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Editar tema",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/temas/{{temaId}}",
+            "description": "Editar tema. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"React y hooks\",\n  \"descripcion\": \"Estado, efectos y contextos\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/temas/{{temaId}}",
+                "description": "Editar tema. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"React y hooks\",\n  \"descripcion\": \"Estado, efectos y contextos\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Completar tema",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/temas/{{temaId}}/completar",
+            "description": "Completar tema. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/temas/{{temaId}}/completar",
+                "description": "Completar tema. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear tarea",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos/{{cursoId}}/tareas",
+            "description": "Crear tarea. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Preparar presentación\",\n  \"descripcion\": \"Ensayar el flujo completo\",\n  \"fechaLimite\": \"2099-12-01\",\n  \"prioridad\": \"ALTA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('tareaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos/{{cursoId}}/tareas",
+                "description": "Crear tarea. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Preparar presentación\",\n  \"descripcion\": \"Ensayar el flujo completo\",\n  \"fechaLimite\": \"2099-12-01\",\n  \"prioridad\": \"ALTA\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"titulo\": \"Preparar presentación\",\n  \"descripcion\": \"Ensayar el flujo completo\",\n  \"fechaLimite\": \"2099-12-01\",\n  \"prioridad\": \"ALTA\",\n  \"id\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar tareas paginadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/tareas?page=0&size=10&search=&sort=fechaLimite",
+            "description": "Listar tareas paginadas. Consulta persistente del usuario autenticado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/tareas?page=0&size=10&search=&sort=fechaLimite",
+                "description": "Listar tareas paginadas. Consulta persistente del usuario autenticado."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"content\": [],\n  \"page\": 0,\n  \"size\": 10,\n  \"total\": 0,\n  \"totalPages\": 0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Editar tarea",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/tareas/{{tareaId}}",
+            "description": "Editar tarea. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Preparar presentación\",\n  \"descripcion\": \"Ensayar el flujo completo\",\n  \"fechaLimite\": \"2099-12-01\",\n  \"prioridad\": \"ALTA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/tareas/{{tareaId}}",
+                "description": "Editar tarea. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Preparar presentación\",\n  \"descripcion\": \"Ensayar el flujo completo\",\n  \"fechaLimite\": \"2099-12-01\",\n  \"prioridad\": \"ALTA\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Completar tarea",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/tareas/{{tareaId}}/completar",
+            "description": "Completar tarea. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/tareas/{{tareaId}}/completar",
+                "description": "Completar tarea. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Evaluaciones",
+      "item": [
+        {
+          "name": "Crear evaluación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos/{{cursoId}}/evaluaciones",
+            "description": "Crear evaluación. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Proyecto 2\",\n  \"descripcion\": \"Entrega final\",\n  \"fecha\": \"2099-12-01\",\n  \"tipo\": \"PROYECTO\",\n  \"ponderacion\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('evaluacionId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos/{{cursoId}}/evaluaciones",
+                "description": "Crear evaluación. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Proyecto 2\",\n  \"descripcion\": \"Entrega final\",\n  \"fecha\": \"2099-12-01\",\n  \"tipo\": \"PROYECTO\",\n  \"ponderacion\": 20\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"titulo\": \"Proyecto 2\",\n  \"descripcion\": \"Entrega final\",\n  \"fecha\": \"2099-12-01\",\n  \"tipo\": \"PROYECTO\",\n  \"ponderacion\": 20,\n  \"id\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Editar evaluación",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/evaluaciones/{{evaluacionId}}",
+            "description": "Editar evaluación. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Proyecto 2\",\n  \"descripcion\": \"Entrega final\",\n  \"fecha\": \"2099-12-01\",\n  \"tipo\": \"PROYECTO\",\n  \"ponderacion\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/evaluaciones/{{evaluacionId}}",
+                "description": "Editar evaluación. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Proyecto 2\",\n  \"descripcion\": \"Entrega final\",\n  \"fecha\": \"2099-12-01\",\n  \"tipo\": \"PROYECTO\",\n  \"ponderacion\": 20\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Registrar calificación",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/evaluaciones/{{evaluacionId}}/calificacion",
+            "description": "Registrar calificación. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calificacion\": 17.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/evaluaciones/{{evaluacionId}}/calificacion",
+                "description": "Registrar calificación. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"calificacion\": 17.5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Objetivos",
+      "item": [
+        {
+          "name": "Listar objetivos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/objetivos",
+            "description": "Listar objetivos. Consulta persistente del usuario autenticado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/objetivos",
+                "description": "Listar objetivos. Consulta persistente del usuario autenticado."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear objetivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/objetivos",
+            "description": "Crear objetivo. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Completar mi plan de estudio\",\n  \"descripcion\": \"Un paso al día\",\n  \"fechaLimite\": \"2099-12-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('objetivoId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/objetivos",
+                "description": "Crear objetivo. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Completar mi plan de estudio\",\n  \"descripcion\": \"Un paso al día\",\n  \"fechaLimite\": \"2099-12-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"titulo\": \"Completar mi plan de estudio\",\n  \"descripcion\": \"Un paso al día\",\n  \"fechaLimite\": \"2099-12-01\",\n  \"id\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Editar objetivo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/objetivos/{{objetivoId}}",
+            "description": "Editar objetivo. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Completar mi plan de estudio\",\n  \"descripcion\": \"Un paso al día\",\n  \"fechaLimite\": \"2099-12-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/objetivos/{{objetivoId}}",
+                "description": "Editar objetivo. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Completar mi plan de estudio\",\n  \"descripcion\": \"Un paso al día\",\n  \"fechaLimite\": \"2099-12-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Completar objetivo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/objetivos/{{objetivoId}}/completar",
+            "description": "Completar objetivo. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/objetivos/{{objetivoId}}/completar",
+                "description": "Completar objetivo. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Recordatorios",
+      "item": [
+        {
+          "name": "Listar recordatorios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/recordatorios",
+            "description": "Listar recordatorios. Consulta persistente del usuario autenticado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/recordatorios",
+                "description": "Listar recordatorios. Consulta persistente del usuario autenticado."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear recordatorio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/recordatorios",
+            "description": "Crear recordatorio. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Ensayo del pitch\",\n  \"descripcion\": \"Preparar el teléfono\",\n  \"fechaHora\": \"2099-12-01T18:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('recordatorioId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/recordatorios",
+                "description": "Crear recordatorio. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Ensayo del pitch\",\n  \"descripcion\": \"Preparar el teléfono\",\n  \"fechaHora\": \"2099-12-01T18:00:00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"titulo\": \"Ensayo del pitch\",\n  \"descripcion\": \"Preparar el teléfono\",\n  \"fechaHora\": \"2099-12-01T18:00:00\",\n  \"id\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Editar recordatorio",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/recordatorios/{{recordatorioId}}",
+            "description": "Editar recordatorio. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Ensayo del pitch\",\n  \"descripcion\": \"Preparar el teléfono\",\n  \"fechaHora\": \"2099-12-01T18:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/recordatorios/{{recordatorioId}}",
+                "description": "Editar recordatorio. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Ensayo del pitch\",\n  \"descripcion\": \"Preparar el teléfono\",\n  \"fechaHora\": \"2099-12-01T18:00:00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Operación correcta\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Limpieza de datos de prueba",
+      "item": [
+        {
+          "name": "Eliminar tema",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/temas/{{temaId}}",
+            "description": "Eliminar tema. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/temas/{{temaId}}",
+                "description": "Eliminar tema. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Eliminar tarea",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/tareas/{{tareaId}}",
+            "description": "Eliminar tarea. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/tareas/{{tareaId}}",
+                "description": "Eliminar tarea. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Eliminar evaluación",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/evaluaciones/{{evaluacionId}}",
+            "description": "Eliminar evaluación. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/evaluaciones/{{evaluacionId}}",
+                "description": "Eliminar evaluación. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Eliminar objetivo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/objetivos/{{objetivoId}}",
+            "description": "Eliminar objetivo. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/objetivos/{{objetivoId}}",
+                "description": "Eliminar objetivo. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Eliminar recordatorio",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/recordatorios/{{recordatorioId}}",
+            "description": "Eliminar recordatorio. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/recordatorios/{{recordatorioId}}",
+                "description": "Eliminar recordatorio. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Eliminar curso",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos/{{cursoId}}",
+            "description": "Eliminar curso. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos/{{cursoId}}",
+                "description": "Eliminar curso. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Eliminar curso importado",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/cursos/{{cursoImportadoId}}",
+            "description": "Eliminar curso importado. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/cursos/{{cursoImportadoId}}",
+                "description": "Eliminar curso importado. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Cerrar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client",
+                "value": "native"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/logout",
+            "description": "Cerrar sesión. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo de estructura (ilustrativo)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Client",
+                    "value": "native"
+                  }
+                ],
+                "url": "{{baseUrl}}/auth/logout",
+                "description": "Cerrar sesión. Esta operación modifica o elimina datos: utilizar una cuenta de pruebas.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

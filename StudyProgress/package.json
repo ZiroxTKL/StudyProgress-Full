@@ -1,0 +1,28 @@
+{
+  "name": "studyprogress",
+  "version": "2.0.0",
+  "private": true,
+  "workspaces": [
+    "web",
+    "mobile",
+    "packages/client"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @studyprogress/client && npm run test -w web",
+    "mobile": "npm run start -w mobile"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "overrides": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
+}

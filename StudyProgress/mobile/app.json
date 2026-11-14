@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "StudyProgress",
+    "slug": "studyprogress-grupo7",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "studyprogress",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "pe.studyprogress.grupo7"
+    },
+    "android": {
+      "package": "pe.studyprogress.grupo7",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite usar la cámara para importar cursos con QR.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Usamos tu ubicación solo al consultar el clima para planear tu sesión de estudio."
+        }
+      ],
+      "expo-secure-store"
+    ],
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "77487daa-2645-4271-ba32-33c8699c0f30"
+      }
+    },
+    "owner": "roedeer"
+  }
+}

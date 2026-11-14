@@ -1,0 +1,42 @@
+name: studyprogress-entrega2
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: studyprogress
+      POSTGRES_USER: studyprogress
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Ejecuta node scripts/setup-local.mjs}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studyprogress -d studyprogress"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  backend:
+    build: .
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/studyprogress
+      SPRING_DATASOURCE_USERNAME: studyprogress
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?required}
+      JWT_SECRET: ${JWT_SECRET:?required}
+      COOKIE_SECURE: "false"
+      ALLOWED_ORIGINS: http://localhost:8088,http://127.0.0.1:8088,${LOCAL_WEB_ORIGIN:-http://localhost:8088}
+      EMAIL_ENABLED: "false"
+      TZ: America/Lima
+    depends_on:
+      db:
+        condition: service_healthy
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8088:80"
+    depends_on:
+      - backend
+volumes:
+  pgdata:
