@@ -1,6 +1,0 @@
-# Optional LAN access for a physical phone, in addition to the loopback binding.
-# Run node scripts/configure-mobile-local.mjs before using this file.
-services:
-  web:
-    ports:
-      - "${LAN_IP:?Ejecuta node scripts/configure-mobile-local.mjs}:8088:80"

@@ -2,23 +2,21 @@
 
 **CS2031 - Desarrollo Basado en Plataformas · 2026-2 · Grupo 7**
 
-StudyProgress reúne cursos, temas, tareas, evaluaciones, objetivos y recordatorios para que un estudiante pueda elegir su siguiente actividad y observar el avance de su semestre. Esta preparación se entrega para ejecución local; la publicación externa queda para una etapa posterior. La segunda entrega incorpora una web en React, una aplicación React Native con Expo y las ampliaciones de API necesarias para que ambos clientes trabajen sobre los mismos datos persistentes.
+StudyProgress reúne cursos, temas, tareas, evaluaciones, objetivos y recordatorios para que un estudiante pueda elegir su siguiente actividad y observar el avance de su semestre. La segunda entrega incorpora una web en React, una aplicación React Native con Expo y las ampliaciones de API necesarias para que ambos clientes trabajen sobre los mismos datos persistentes.
 
 Repositorio de la entrega: https://github.com/ZiroxTKL/StudyProgress-Full
 
 Backend de la primera entrega: https://github.com/pedrochavezoscanoa/studyprogress-backend
 
-## Contenido
+## Enlaces de entrega
 
-1. [Problema y objetivos](#problema-y-objetivos)
-2. [Funcionalidades](#funcionalidades)
-3. [Arquitectura](#arquitectura)
-4. [Ejecución local](#ejecución-local)
-5. [App móvil](#app-móvil)
-6. [Seguridad y errores](#seguridad-y-errores)
-7. [Pruebas](#pruebas)
-8. [Despliegue y documentación](#despliegue-y-documentación)
-9. [Equipo y participación](#equipo-y-participación)
+Registra aquí los enlaces definitivos después de verificar cada servicio desde otra red.
+
+| Componente | Enlace |
+|---|---|
+| Web React en Vercel | Pendiente de publicación |
+| API Spring Boot en AWS | Pendiente de publicación |
+| APK Android en Expo EAS | Pendiente de publicación |
 
 ## Problema y objetivos
 
@@ -41,9 +39,6 @@ src/                         Backend Spring Boot de la primera entrega + API v1
 web/src/                     React: pages, components, hooks, contexts, services
 mobile/src/                  React Native: screens, components, hooks, contexts, services
 packages/client/src/         Tipos, cliente Axios y validaciones compartidas
-scripts/                     Preparación local, datos de demo y medición de despliegue
-deploy/                      Caddy, configuración HTTPS y proxy
-docs/                        Matriz de rúbrica, guía, guion y evidencias
 ```
 
 ```mermaid
@@ -61,88 +56,79 @@ flowchart LR
 
 Los controladores de `/api/v1` delegan a servicios que verifican el usuario autenticado antes de acceder o modificar recursos. `PortalService` agrupa los casos que necesita el cliente y reutiliza los servicios de la entrega 1. Los mappers entregan DTOs. Los repositorios paginados incluyen el correo del dueño en la consulta SQL; no descargan datos de otros usuarios ni recortan listas en memoria. La importación QR utiliza una transacción para guardar el curso con sus temas. Al eliminar un curso se eliminan primero sus actividades relacionadas dentro de la misma transacción.
 
-El modelo conserva Usuario, Curso, Tema, Tarea, Evaluación, Objetivo y Recordatorio. Agrega RefreshSession para renovar sesiones por dispositivo. Cada usuario tiene cursos, objetivos, recordatorios y sesiones; cada curso contiene temas, tareas y evaluaciones. La documentación de la primera entrega y el diagrama de entidades original se conservan en [docs/ENTREGA_1.md](docs/ENTREGA_1.md).
+El modelo conserva Usuario, Curso, Tema, Tarea, Evaluación, Objetivo y Recordatorio. Agrega RefreshSession para renovar sesiones por dispositivo. Cada usuario tiene cursos, objetivos, recordatorios y sesiones; cada curso contiene temas, tareas y evaluaciones.
 
-## Ejecución local
+## Despliegue
 
-Se necesita **Java 21**, **Node 24** y npm. Maven Wrapper viene en el repositorio. Ejecuta los comandos de la aplicación desde la raíz del repositorio.
+El contenedor del backend compila con Java 21. La web y la app comparten las dependencias y el cliente desde la raíz del repositorio. Usa Node 24 para instalar y compilar los clientes.
 
-### Opción rápida sin instalar PostgreSQL
+### PostgreSQL en RDS y backend en EC2
 
-En PowerShell, abre una terminal para cada proceso:
+1. Crea una base PostgreSQL llamada `studyprogress` en RDS. Mantén la base privada y permite el puerto 5432 desde el grupo de seguridad del backend.
+2. En EC2, configura un archivo `.env` basado en `.env.example`. Completa la URL JDBC con el endpoint real de RDS, el usuario, la contraseña y un `JWT_SECRET` aleatorio. Define `ALLOWED_ORIGINS` con la URL HTTPS de Vercel, sin barra final, y conserva `COOKIE_SECURE=true`. El Dockerfile incluye el certificado raíz de RDS que usa la URL JDBC de ejemplo.
+3. Construye y arranca la imagen detrás del proxy HTTPS del servidor. Si el proxy se ejecuta en la misma instancia, puede llegar a Spring Boot en el puerto local 8080.
 
-```powershell
-# Terminal 1: API con base H2 persistente, exclusivamente para desarrollo
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"
-
-# Terminal 2: clientes y datos de demostración
-npm ci
-node scripts/seed-demo.mjs
-npm run dev
+```bash
+docker build -t studyprogress-api .
+docker run -d --name studyprogress-api --restart unless-stopped --env-file .env -p 127.0.0.1:8080:8080 studyprogress-api
 ```
 
-Abre **http://localhost:5173**. La cuenta de demostración local es `demo@studyprogress.example` y su contraseña pública es `DemoStudy2026`. El script guarda cursos y actividades mediante solicitudes reales a la API; la interfaz no utiliza arreglos de datos simulados. Reejecutarlo conserva los cursos de demo ya creados. H2 guarda los datos en `data/`, que Git ignora. No uses el perfil `demo` ni esa cuenta pública en producción.
+Comprueba que `https://api.example.com/health` responda usando el dominio real. Configura el certificado y conserva las credenciales de RDS y de sesión en el servidor. [Conexión TLS a PostgreSQL en RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Concepts.General.SSL.html)
 
-En macOS/Linux se utiliza `./mvnw` en lugar de `mvnw.cmd`. Si Java apunta a una versión antigua, configura `JAVA_HOME` con la instalación de Java 21. El perfil normal utiliza PostgreSQL y exige `JWT_SECRET`; el perfil de demo incluye una clave local explícitamente no apta para producción.
+### Web en Vercel
 
-### Stack completo local con PostgreSQL y Docker
+Importa el repositorio con la raíz del proyecto en `.`, instala con `npm ci`, compila con `npm run build` y publica `web/dist`. Configura `VITE_API_BASE_URL=/api/v1`. Añade un `vercel.json` en la raíz con las siguientes reescrituras y reemplaza `api.example.com` por el dominio HTTPS de tu API.
 
-```powershell
-node scripts/setup-local.mjs
-docker compose up -d --build
+```json
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://api.example.com/api/:path*" },
+    { "source": "/:path*", "destination": "/index.html" }
+  ]
+}
 ```
 
-Abre **http://localhost:8088**. El script genera secretos aleatorios en un `.env` ignorado y conserva cualquier archivo existente. La base no publica su puerto. Para cargar la demo en ese entorno, configura `$env:API_URL='http://localhost:8088/api/v1'` antes de ejecutar `node scripts/seed-demo.mjs`. Para detenerlo sin perder datos, usa `docker compose down`.
+La primera regla mantiene las solicitudes de sesión en el dominio de la web. La segunda permite abrir rutas como `/cursos` directamente. [Vite en Vercel](https://vercel.com/docs/frameworks/frontend/vite) · [Reescrituras en Vercel](https://vercel.com/docs/routing/rewrites)
 
-## App móvil
+### App Android en Expo EAS
+
+El perfil `preview` de `mobile/eas.json` genera una APK de distribución interna. Usa una cuenta con acceso al proyecto Expo configurado en `mobile/app.json` y reemplaza el dominio de ejemplo por el de la API pública.
 
 ```powershell
-# Para usar la app con el stack Docker local:
-node scripts/configure-mobile-local.mjs
-docker compose -f docker-compose.yml -f docker-compose.mobile.yml up -d
-npm run mobile
+cd mobile
+npx eas-cli@latest login
+npx eas-cli@latest env:set --name EXPO_PUBLIC_API_URL --value https://api.example.com/api/v1 --environment preview --visibility plaintext
+npx eas-cli@latest build --platform android --profile preview
 ```
 
-Escanea el QR de Expo con un teléfono que tenga una versión compatible de Expo Go. El proyecto utiliza Expo SDK 58 y sus versiones compatibles de React Native y sensores. El QR de Expo abre la aplicación; el QR dentro del detalle de un curso sirve para importar contenido. Son flujos distintos. En un teléfono físico `localhost` apunta al propio teléfono, por lo que debes usar la IP de la computadora y estar en la misma red. En producción, el cliente exige una URL `https://`.
+Comparte el enlace de instalación que genera EAS. La app instalada se conecta al backend por HTTPS. [Distribución interna con EAS](https://docs.expo.dev/build/internal-distribution/) · [Variables de EAS Build](https://docs.expo.dev/eas/environment-variables/usage/)
 
-El configurador detecta la IP LAN y escribe solo configuración local ignorada por Git. Si necesitas elegir otra interfaz, ejecuta `node scripts/configure-mobile-local.mjs TU_IP_LAN`. El archivo adicional de Compose habilita el acceso desde el teléfono en esa IP. Si usas el perfil H2 en lugar de Docker, copia `mobile/.env.example` a `mobile/.env` y ajusta la URL a la IP de tu computadora con puerto 8080.
+### Comprobar la entrega publicada
 
-La app separa servicios HTTP, hooks, contextos, pantallas y componentes. El contexto de autenticación comparte el usuario, y la navegación utiliza un reducer con historial y manejo del botón Atrás de Android. SecureStore conserva las credenciales de sesión. Los permisos de cámara y ubicación se solicitan solo cuando el usuario inicia la función, se explican y tienen alternativas manuales. Ver [docs/PRUEBAS_MANUALES.md](docs/PRUEBAS_MANUALES.md) para verificar ambos sensores en un dispositivo real.
+Registra una cuenta nueva desde la web, crea un curso y ábrelo con la misma cuenta en la APK instalada. Comprueba que las sesiones se mantengan al recargar y que funcionen el lector QR, la ubicación y las alternativas al denegar permisos. Usa `postman_collection.json` para revisar la API con una cuenta de prueba.
 
 ## Seguridad y errores
 
-Spring Security protege la API y los servicios comprueban la propiedad de los datos. Las contraseñas utilizan BCrypt y no se devuelven en las respuestas. El acceso JWT dura 15 minutos por defecto. La web guarda ese token en memoria y utiliza una cookie de renovación HttpOnly, SameSite Strict y Secure en producción. Por ello, el despliegue propuesto sirve web y `/api` desde el mismo origen mediante Caddy. Las operaciones de sesión verifican Origin y rechazan solicitudes marcadas como cross-site.
+Spring Security protege la API y los servicios comprueban la propiedad de los datos. Las contraseñas utilizan BCrypt y no se devuelven en las respuestas. El acceso JWT dura 15 minutos por defecto. La web guarda ese token en memoria y utiliza una cookie de renovación HttpOnly, SameSite Strict y Secure en producción. Por ello, la web usa una reescritura de Vercel para servir `/api` desde el mismo origen. Las operaciones de sesión verifican Origin y rechazan solicitudes marcadas como cross-site.
 
 En móvil, Axios envía el token Bearer y renueva usando un refresh guardado con SecureStore. El refresh es aleatorio, dura siete días y el servidor solo guarda su hash SHA-256. Cada renovación consume el token previo bajo bloqueo de fila y emite otro. Cerrar sesión revoca el refresh del dispositivo y elimina las credenciales locales; el token de acceso ya emitido puede seguir siendo válido hasta su expiración. La implementación no promete revocación inmediata de todos los JWT.
 
 Los interceptores centralizan autenticación y reintentan únicamente lecturas recuperables. No repiten escrituras después de una pérdida de conexión, para evitar duplicados. Los hooks cancelan lecturas con AbortController al cambiar de vista. Las pantallas incluyen cargas, errores, estados vacíos, confirmación de eliminación y prevención de doble envío. Las validaciones compartidas con Zod dan respuesta temprana, y Jakarta Validation vuelve a validar en el servidor. Los mensajes de error ocultan detalles internos de infraestructura.
 
-Los eventos de registro, objetivos y recordatorios de la primera entrega se conservan. El correo exige `EMAIL_ENABLED=true`, una API key Resend y un remitente autorizado. El scheduler de recordatorios solo se activa al habilitar el servicio, por lo que una demo sin correo no informa falsamente que entregó notificaciones. Todas las claves reales se inyectan mediante variables de entorno.
+Los eventos de registro, objetivos y recordatorios de la primera entrega se conservan. El correo exige `EMAIL_ENABLED=true`, una API key Resend y un remitente autorizado. El scheduler de recordatorios solo se activa al habilitar el servicio. Todas las claves reales se inyectan mediante variables de entorno.
 
 ## Pruebas
 
 ```powershell
 .\mvnw.cmd verify
+npm ci
 npm run typecheck
 npm test
 npm run build
 npm exec -w mobile -- expo install --check
-npm run export -w mobile
 ```
 
-Los contratos JUnit envían HTTP real y prueban autenticación, propiedad, paginación, validación, actualización del progreso, sesiones y eliminación de datos relacionados. Se ejecutan contra H2 y también contra PostgreSQL 16 con Testcontainers cuando Docker está disponible. Mockito verifica casos del cálculo de progreso. Vitest comprueba validaciones, QR, seguridad del cliente, controles de paginación y formularios. La exportación Expo verifica el empaquetado JavaScript, no reemplaza una prueba física ni publica la app. Los resultados de esta preparación se registran en [docs/VERIFICACION.md](docs/VERIFICACION.md).
-
-## Despliegue y documentación
-
-La configuración incluye contenedores para Spring y web, PostgreSQL local, una variante para RDS y HTTPS automático con Caddy. El despliegue de producción requiere completar las cuentas y parámetros del equipo. La guía explica cómo comprobar AWS y Expo y publicar sin incluir secretos en el código: [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md). No se presenta la URL HTTP heredada de la primera entrega como evidencia de un despliegue verificado de esta versión.
-
-La integración continua ejecuta backend con Testcontainers, tipos y pruebas de ambos clientes, build web y empaquetado Android. Se propone trabajar en ramas por función y revisar mediante pull requests. El repositorio original se mantiene como origen del trabajo; no se inventa un historial de contribuciones individuales ni una gestión previa de issues.
-
-- [Cobertura de la rúbrica 2](docs/MATRIZ_RUBRICA_2.md)
-- [Guion y respuestas técnicas](docs/EXPOSICION.md)
-- [API v1 y colección Postman](docs/API.md)
-- [Pruebas manuales y sensores](docs/PRUEBAS_MANUALES.md)
-- [Pendientes de publicación verificable](docs/ENTREGA.md)
+Los contratos JUnit comprueban autenticación, propiedad, paginación, progreso y concurrencia. PostgreSQL 16 se prueba con Testcontainers cuando Docker está disponible. La base en memoria se limita a las pruebas automatizadas. Vitest comprueba validaciones, QR y formularios. GitHub Actions ejecuta la validación de backend y clientes en cada push y pull request.
 
 ## Equipo y participación
 
@@ -158,7 +144,7 @@ Participación declarada por el equipo para esta entrega: **100 % por integrante
 
 ## Conclusiones y referencias
 
-La segunda entrega convierte el backend en una experiencia utilizable desde dos plataformas, conserva una única fuente de datos académicos y agrega sesiones renovables y paginación real. La modularidad permite ampliar filtros o estadísticas sin duplicar la lógica de negocio entre dispositivos. Antes de presentar, el equipo debe demostrar el stack publicado y los sensores en un teléfono, y dominar los fragmentos indicados en el guion.
+La segunda entrega convierte el backend en una experiencia utilizable desde dos plataformas, conserva una única fuente de datos académicos y agrega sesiones renovables y paginación real. La modularidad permite ampliar filtros o estadísticas sin duplicar la lógica de negocio entre dispositivos. Antes de presentar, el equipo debe demostrar el stack publicado y los sensores en un teléfono,.
 
 Proyecto académico. El material recibido no declara una licencia de código abierto; esta entrega no concede una licencia adicional sobre el trabajo original.
 
