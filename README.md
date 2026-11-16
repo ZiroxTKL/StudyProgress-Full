@@ -10,13 +10,19 @@ Backend de la primera entrega: https://github.com/pedrochavezoscanoa/studyprogre
 
 ## Enlaces de entrega
 
-Registra aquí los enlaces definitivos después de verificar cada servicio desde otra red.
+Servicios comprobados el 15 de noviembre de 2026. La API depende de que la instancia del Learner Lab esté encendida.
 
 | Componente | Enlace |
 |---|---|
-| Web React en Vercel | Pendiente de publicación |
-| API Spring Boot en AWS | Pendiente de publicación |
-| APK Android en Expo EAS | Pendiente de publicación |
+| Web React en Vercel | [Abrir StudyProgress](https://studyprogress-grupo7.vercel.app) |
+| API Spring Boot en AWS EC2 | [API v1](https://54.160.202.67/api/v1) · [Estado del servicio](https://54.160.202.67/health) |
+| APK Android en Expo EAS | [Descargar APK 2.0.0](https://expo.dev/artifacts/eas/L6NJAoNOqCVIdWI7LP2uYfuDng-3zyA5u0qcBBrnFHk.apk) · [Build de Expo](https://expo.dev/accounts/roedeer/projects/studyprogress-grupo7/builds/8e3d6af2-a01d-4702-9e05-419d3f30c927) |
+
+Cuenta de demostración: `demo@studyprogress.example` / `DemoStudy2026`. Contiene datos de ejemplo compartidos para la evaluación. También se puede registrar una cuenta propia.
+
+Presentación: [pitch y demo de 20 minutos](docs/StudyProgress-presentacion.pptx).
+
+![Resumen de StudyProgress publicado en Vercel](docs/capturas/produccion-web.jpg)
 
 ## Problema y objetivos
 
@@ -60,52 +66,45 @@ El modelo conserva Usuario, Curso, Tema, Tarea, Evaluación, Objetivo y Recordat
 
 ## Despliegue
 
-El contenedor del backend compila con Java 21. La web y la app comparten las dependencias y el cliente desde la raíz del repositorio. Usa Node 24 para instalar y compilar los clientes.
+La web está publicada en Vercel, la API en EC2 y PostgreSQL en RDS, en Norte de Virginia (`us-east-1`). La APK firmada se distribuye mediante Expo EAS. Los clientes comparten el contrato de `/api/v1` y acceden a la misma base persistente.
 
-### PostgreSQL en RDS y backend en EC2
+### AWS: API y PostgreSQL
 
-1. Crea una base PostgreSQL llamada `studyprogress` en RDS. Mantén la base privada y permite el puerto 5432 desde el grupo de seguridad del backend.
-2. En EC2, configura un archivo `.env` basado en `.env.example`. Completa la URL JDBC con el endpoint real de RDS, el usuario, la contraseña y un `JWT_SECRET` aleatorio. Define `ALLOWED_ORIGINS` con la URL HTTPS de Vercel, sin barra final, y conserva `COOKIE_SECURE=true`. El Dockerfile incluye el certificado raíz de RDS que usa la URL JDBC de ejemplo.
-3. Construye y arranca la imagen detrás del proxy HTTPS del servidor. Si el proxy se ejecuta en la misma instancia, puede llegar a Spring Boot en el puerto local 8080.
+La infraestructura está definida en [deploy/aws/cloudformation.json](deploy/aws/cloudformation.json): EC2 `t3.small`, PostgreSQL 16 en RDS `db.t3.micro`, discos cifrados, un bucket S3 privado para paquetes y una dirección IPv4 elástica. Se reutiliza `LabInstanceProfile` para administrar la instancia mediante Systems Manager.
 
-```bash
-docker build -t studyprogress-api .
-docker run -d --name studyprogress-api --restart unless-stopped --env-file .env -p 127.0.0.1:8080:8080 studyprogress-api
-```
+RDS no tiene acceso público. El puerto 5432 acepta conexiones únicamente desde el grupo de seguridad del backend. La conexión JDBC exige `sslmode=verify-full` y utiliza el certificado raíz oficial de RDS. El backend se ejecuta con Java 21, usuario sin privilegios y sistema de archivos de solo lectura dentro de su contenedor.
 
-Comprueba que `https://api.example.com/health` responda usando el dominio real. Configura el certificado y conserva las credenciales de RDS y de sesión en el servidor. [Conexión TLS a PostgreSQL en RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Concepts.General.SSL.html)
+[Caddyfile](deploy/aws/Caddyfile) publica HTTPS y [start.sh](deploy/aws/start.sh) inicia los contenedores, comprueba la salud de Spring y conserva los certificados en volúmenes Docker. El certificado público de la IP utiliza el perfil `shortlived` de Let's Encrypt y se renueva automáticamente mientras el servidor está activo. [Certificados de IP](https://letsencrypt.org/2026/01/15/6day-and-ip-general-availability/) · [TLS de RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Concepts.General.SSL.html)
+
+La contraseña de RDS y `JWT_SECRET` se generan fuera del repositorio. La configuración de producción se inyecta mediante un archivo de entorno privado, con `COOKIE_SECURE=true` y `ALLOWED_ORIGINS` limitado a los dominios publicados. `EMAIL_ENABLED=false` evita enviar correos durante la demostración.
+
+El consumo estimado de esta configuración es aproximadamente US$1.20 por 24 horas con todo encendido, antes de créditos y tráfico adicional. RDS, los discos y la IP pueden seguir consumiendo presupuesto con EC2 apagado.
 
 ### Web en Vercel
 
-Importa el repositorio con la raíz del proyecto en `.`, instala con `npm ci`, compila con `npm run build` y publica `web/dist`. Configura `VITE_API_BASE_URL=/api/v1`. Añade un `vercel.json` en la raíz con las siguientes reescrituras y reemplaza `api.example.com` por el dominio HTTPS de tu API.
+El proyecto `dbp67/studyprogress-grupo7` utiliza el plan Hobby. La raíz de compilación es el repositorio completo: `npm ci`, `npm run build` y salida `web/dist`. `VITE_API_BASE_URL=/api/v1` está configurada en producción.
 
-```json
-{
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "https://api.example.com/api/:path*" },
-    { "source": "/:path*", "destination": "/index.html" }
-  ]
-}
-```
+[vercel.json](vercel.json) sirve las rutas de React y reenvía `/api/*` por HTTPS hacia EC2. Las solicitudes de sesión conservan el origen de la web, por lo que la cookie HttpOnly se puede renovar sin depender de cookies de terceros. La configuración también agrega las cabeceras de seguridad de la web.
 
-La primera regla mantiene las solicitudes de sesión en el dominio de la web. La segunda permite abrir rutas como `/cursos` directamente. [Vite en Vercel](https://vercel.com/docs/frameworks/frontend/vite) · [Reescrituras en Vercel](https://vercel.com/docs/routing/rewrites)
+### APK Android en Expo EAS
 
-### App Android en Expo EAS
-
-El perfil `preview` de `mobile/eas.json` genera una APK de distribución interna. Usa una cuenta con acceso al proyecto Expo configurado en `mobile/app.json` y reemplaza el dominio de ejemplo por el de la API pública.
+El proyecto Expo es `@roedeer/studyprogress-grupo7`. El perfil `preview` genera una APK de distribución interna, con la URL de AWS definida en el entorno `preview` de EAS. La versión publicada es `2.0.0`, build Android `1`.
 
 ```powershell
 cd mobile
-npx eas-cli@latest login
-npx eas-cli@latest env:set --name EXPO_PUBLIC_API_URL --value https://api.example.com/api/v1 --environment preview --visibility plaintext
+npx eas-cli@latest env:set preview --name EXPO_PUBLIC_API_URL --value https://54.160.202.67/api/v1 --visibility plaintext
 npx eas-cli@latest build --platform android --profile preview
 ```
 
-Comparte el enlace de instalación que genera EAS. La app instalada se conecta al backend por HTTPS. [Distribución interna con EAS](https://docs.expo.dev/build/internal-distribution/) · [Variables de EAS Build](https://docs.expo.dev/eas/environment-variables/usage/)
+La cámara y la ubicación se prueban desde **Herramientas**. Para el QR, abre un curso en la web, pulsa **Compartir QR**, escanéalo con **Abrir cámara** en la APK y confirma la importación. **Usar mi ubicación** consulta Open-Meteo y muestra la recomendación de estudio. [Distribución interna con EAS](https://docs.expo.dev/build/internal-distribution/)
 
-### Comprobar la entrega publicada
+### Antes de la exposición
 
-Registra una cuenta nueva desde la web, crea un curso y ábrelo con la misma cuenta en la APK instalada. Comprueba que las sesiones se mantengan al recargar y que funcionen el lector QR, la ubicación y las alternativas al denegar permisos. Usa `postman_collection.json` para revisar la API con una cuenta de prueba.
+1. Abre AWS Academy → Módulos → Learner Lab y pulsa **Start Lab**. Espera el indicador verde y abre la consola AWS desde el laboratorio.
+2. En EC2, comprueba que la instancia **StudyProgress** esté en ejecución. Si figura detenida, iníciala.
+3. Abre [health](https://54.160.202.67/health) y comprueba `status: UP`. Luego prueba el ingreso desde Vercel y la APK.
+
+El curso establece sesiones de cuatro horas y apagado automático de EC2 al finalizar. Los datos permanecen en RDS y la IP elástica se conserva; el entorno no garantiza disponibilidad las 24 horas. Después de la evaluación se deben revisar los recursos que continuarán consumiendo presupuesto.
 
 ## Seguridad y errores
 
@@ -130,6 +129,20 @@ npm exec -w mobile -- expo install --check
 
 Los contratos JUnit comprueban autenticación, propiedad, paginación, progreso y concurrencia. PostgreSQL 16 se prueba con Testcontainers cuando Docker está disponible. La base en memoria se limita a las pruebas automatizadas. Vitest comprueba validaciones, QR y formularios. GitHub Actions ejecuta la validación de backend y clientes en cada push y pull request.
 
+### Verificación del despliegue público
+
+La versión publicada pasó 17 comprobaciones de API: HTTPS, autenticación, cookie segura, renovación web y móvil, revocación, datos persistentes, aislamiento entre usuarios, importación de cursos y paginación de cursos y tareas. Otras cinco comprobaciones verificaron la web pública y el proxy de Vercel, incluyendo login y renovación de sesión. También se comprobó el ingreso y la recarga de sesión en un navegador.
+
+| Endpoint | Solicitudes medidas | Promedio |
+|---|---:|---:|
+| `/api/v1/dashboard` | 10 | 225 ms |
+| `/api/v1/cursos?size=10` | 10 | 174 ms |
+| `/api/v1/tareas?size=10` | 10 | 129 ms |
+
+Las mediciones utilizaron HTTPS con conexión persistente desde el equipo de prueba, sin carga concurrente. Describen esa comprobación; no constituyen una garantía de latencia o disponibilidad futura.
+
+El equipo confirmó el ingreso y la importación QR desde un teléfono Android. La comprobación física de ubicación y clima está pendiente de confirmación.
+
 ## Equipo y participación
 
 Participación declarada por el equipo para esta entrega: **100 % por integrante**. El porcentaje representa cumplimiento individual de responsabilidades, no una distribución que deba sumar 100 %. Los aportes de la siguiente tabla fueron confirmados por el equipo.
@@ -144,7 +157,7 @@ Participación declarada por el equipo para esta entrega: **100 % por integrante
 
 ## Conclusiones y referencias
 
-La segunda entrega convierte el backend en una experiencia utilizable desde dos plataformas, conserva una única fuente de datos académicos y agrega sesiones renovables y paginación real. La modularidad permite ampliar filtros o estadísticas sin duplicar la lógica de negocio entre dispositivos. Antes de presentar, el equipo debe demostrar el stack publicado y los sensores en un teléfono,.
+La segunda entrega convierte el backend en una experiencia utilizable desde dos plataformas, conserva una única fuente de datos académicos y agrega sesiones renovables y paginación real. La modularidad permite ampliar filtros o estadísticas sin duplicar la lógica de negocio entre dispositivos. La exposición incluye una demostración del stack publicado y el uso de los sensores desde un teléfono.
 
 Proyecto académico. El material recibido no declara una licencia de código abierto; esta entrega no concede una licencia adicional sobre el trabajo original.
 

@@ -18,8 +18,8 @@ public class SecurityConfig {
             .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(a->a.requestMatchers("/health","/api/auth/**","/api/v1/auth/login","/api/v1/auth/registro","/api/v1/auth/refresh","/api/v1/auth/logout").permitAll()
                 .requestMatchers("/api/usuarios/**","/api/email/**").hasRole("ADMIN").anyRequest().authenticated())
-            .exceptionHandling(e->e.authenticationEntryPoint((q,r,x)->{r.setStatus(401);r.setContentType("application/json");r.getWriter().write("{\"status\":401,\"message\":\"Inicia sesión para continuar\"}");})
-                .accessDeniedHandler((q,r,x)->{r.setStatus(403);r.setContentType("application/json");r.getWriter().write("{\"status\":403,\"message\":\"No tienes permiso para esta acción\"}");}))
+            .exceptionHandling(e->e.authenticationEntryPoint((q,r,x)->{r.setStatus(401);r.setContentType("application/json;charset=UTF-8");r.getWriter().write("{\"status\":401,\"message\":\"Inicia sesión para continuar\"}");})
+                .accessDeniedHandler((q,r,x)->{r.setStatus(403);r.setContentType("application/json;charset=UTF-8");r.getWriter().write("{\"status\":403,\"message\":\"No tienes permiso para esta acción\"}");}))
             .addFilterBefore(jwt,UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

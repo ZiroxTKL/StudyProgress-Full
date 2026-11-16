@@ -34,7 +34,7 @@ abstract class WorkflowContract {
     Result login(String email)throws Exception{return call("POST","/api/v1/auth/login","{\"email\":\""+email+"\",\"password\":\"TestPass123\"}",null);}
     long course(String token,String name)throws Exception{var r=call("POST","/api/v1/cursos","{\"nombre\":\""+name+"\",\"descripcion\":\"Curso test\"}",token);assertEquals(201,r.status());return r.body().get("id").asLong();}
     String taskBody(){return "{\"titulo\":\"Resolver proyecto\",\"descripcion\":\"Test\",\"fechaLimite\":\"2099-12-01\",\"prioridad\":\"ALTA\"}";}
-    @Test void unauthenticatedRequestsReturn401()throws Exception{assertEquals(401,call("GET","/api/v1/cursos",null,null).status());assertEquals(200,call("GET","/health",null,null).status());}
+    @Test void unauthenticatedRequestsReturn401()throws Exception{var response=call("GET","/api/v1/cursos",null,null);assertEquals(401,response.status());assertEquals("Inicia sesión para continuar",response.body().get("message").asText());assertEquals(200,call("GET","/health",null,null).status());}
     @Test void registrationDuplicateAndInvalidCredentials()throws Exception{String e=email();registerAndLogin(e);assertEquals(409,call("POST","/api/v1/auth/registro","{\"nombre\":\"Test User\",\"email\":\""+e+"\",\"password\":\"TestPass123\"}",null).status());assertEquals(401,call("POST","/api/v1/auth/login","{\"email\":\""+e+"\",\"password\":\"incorrecta\"}",null).status());}
     @Test void coursesAreFilteredPaginatedAndScoped()throws Exception{
         String a=registerAndLogin(email()),b=registerAndLogin(email());for(int i=0;i<12;i++)course(a,"Matemática "+i);course(b,"Privado");
