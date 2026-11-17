@@ -149,10 +149,7 @@ Participación declarada por el equipo para esta entrega: **100 % por integrante
 
 | Integrante | Principales aportes | Participación |
 |---|---|---:|
-| Pedro Maximo Chavez Oscanoa | Backend, modelo de datos y contratos REST | 100 % |
 | Marcelo Mateo Rosillo Rodriguez | Web React, vistas, componentes y formularios | 100 % |
-| Jorge Andrés Cuevas Sánchez | React Native, sensores y API de clima | 100 % |
-| Aquino Reyna Jesús Emmanuel | Autenticación, seguridad e integración de clientes | 100 % |
 | Leonardo Martinez Aquino | Pruebas, contenedores y preparación de despliegue | 100 % |
 
 ## Conclusiones y referencias
